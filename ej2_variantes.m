@@ -8,12 +8,14 @@
 %    diferencias y sacar conclusiones."
 %
 % CÓMO SE RESUELVE
-%   Este archivo es un SCRIPT (no una función) que llama varias veces a la
-%   función ej2(dt, Nh, Fc) con distintos parámetros. Cada llamada abre
-%   una ventana de gráficos nueva.
+%   El caso base (dt = 0.0001, Nh = 101) es el que ya grafica ej2.m, así
+%   que acá no se repite. Este script abre solo 4 gráficos:
+%     a) dt = 0.0005 y dt = 0.001   (con Nh = 101)     -> 2 gráficos
+%     b) Nh = 21 y Nh = 201         (con dt = 0.0001)  -> 2 gráficos
+%   Cada llamada a la función ej2(dt, Nh) abre una ventana nueva.
 %
 % SINTAXIS NUEVA EN ESTE ARCHIVO
-%   for v = [a b c]      -> repite el bloque con v = a, después v = b, ...
+%   for v = [a b]        -> repite el bloque con v = a y después con v = b
 %     ...
 %   end
 %   printf(formato, valores) -> imprime texto con formato en la consola
@@ -33,14 +35,13 @@ clear; clc; close all;
 %   2*Fc*dt            -> el factor que aparece en h[n] = 2FcΔt sinc(2FcΔt n)
 %   max|y|             -> amplitud de la salida
 %
-% RESULTADOS (corridos en Octave 11.3):
-%   dt = 0.0001  Fm = 10000 Hz  2*Fc*dt = 0.10  max|y| = 10.078
+% RESULTADOS (corridos en Octave 11.3; el caso base dt = 0.0001 da 10.078):
 %   dt = 0.0005  Fm =  2000 Hz  2*Fc*dt = 0.50  max|y| = 10.089
 %   dt = 0.001   Fm =  1000 Hz  2*Fc*dt = 1.00  max|y| = 10.000
 %
 % INTERPRETACIÓN (lo más importante para las conclusiones)
-%   * dt = 0.0001 (Fm = 10 kHz): caso "bueno". Nyquist = Fm/2 = 5000 Hz,
-%     ambas componentes están bien representadas y el filtro elimina la de
+%   * Caso base dt = 0.0001 (Fm = 10 kHz, en ej2.m): Nyquist = 5000 Hz,
+%     ambas componentes bien representadas y el filtro elimina la de
 %     1000 Hz. La salida es ~10 cos(2π·150·t).
 %
 %   * dt = 0.0005 (Fm = 2 kHz): Nyquist = 1000 Hz, ¡justo la frecuencia de
@@ -55,7 +56,7 @@ clear; clc; close all;
 %     y = x (por eso max|y| = 10 exacto). Fc = 500 Hz coincide con Nyquist:
 %     el filtro deja pasar todo lo que se puede representar.
 %
-%   CONCLUSIÓN: en los dos últimos casos la salida se ve "limpia", pero no
+%   CONCLUSIÓN: en estos dos casos la salida se ve "limpia", pero no
 %   gracias al filtro sino al muestreo. Si la componente alta fuera un
 %   coseno en vez de un seno, no se anularía: aparecería disfrazada como
 %   otra frecuencia (alias), y el filtro ya no podría separarla. Moraleja:
@@ -63,7 +64,7 @@ clear; clc; close all;
 %   Otra diferencia visible: con las mismas 401 muestras, la ventana dura
 %   0.04 s, 0.2 s y 0.4 s respectivamente (Nx·dt), así que se ven 6, 30 y
 %   60 periodos de la componente de 150 Hz.
-for dt = [0.0001 0.0005 0.001]
+for dt = [0.0005 0.001]
   % Llama a ej2 y se queda solo con las dos primeras salidas (ny, y).
   [ny, y] = ej2(dt, 101);
   printf('dt = %-7g  Fm = %6g Hz  2*Fc*dt = %4.2f  max|y| = %6.3f\n', ...
@@ -71,7 +72,8 @@ for dt = [0.0001 0.0005 0.001]
 end
 
 % --- b) Variación del largo del núcleo (dt = 0.0001, Fc = 500 Hz) --------
-% Se repite con Nh = 21, 51 y 201 (el caso base era 101).
+% Se prueba un Nh más chico (21) y uno más grande (201) que el caso base
+% (101), para ver el efecto en las dos direcciones.
 % Acá no se piden salidas: ej2(...) solo abre los gráficos.
 %
 % QUÉ OBSERVAR
@@ -86,14 +88,12 @@ end
 %   * Costo de un Nh grande: más cuentas (cada y[n] suma Nh productos) y
 %     transitorios más largos en los bordes de y[n] (duran ~Nh muestras),
 %     y la salida total es más larga (Nx + Nh - 1).
-for Nh = [21 51 201]
+for Nh = [21 201]
   ej2(0.0001, Nh);
 end
 
-% --- c) Caso del ejemplo del enunciado: Fc = 1000 Hz ---------------------
-% Fc coincide con la frecuencia de la componente de 1000 Hz, por lo que
-% esa componente queda en el borde de la banda y pasa atenuada a la mitad.
-% (En el corte, la respuesta en frecuencia del filtro truncado vale ~0.5,
-%  a medio camino entre 1 (banda de paso) y 0 (banda eliminada). Por eso
-%  conviene elegir Fc bien en el medio, como los 500 Hz de los casos a y b.)
-ej2(0.0001, 101, 1000);
+% NOTA: el caso Fc = 1000 Hz (el ejemplo del enunciado) no se grafica acá
+% porque la consigna no pide variar Fc. Si lo piden en la defensa:
+%   >> ej2([], [], 1000)
+% La componente de 1000 Hz cae justo en el corte, donde la respuesta en
+% frecuencia vale ~0.5, y pasa atenuada a la mitad (amplitud ~2.5).

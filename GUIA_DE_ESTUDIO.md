@@ -175,7 +175,7 @@ y[n] :  0  1  3  6 10 15 15 14 12  9  5
 
 ## 4. Ejercicio 2: filtrado con una sinc
 
-**Archivos:** [`ej2.m`](ej2.m) (función) y [`ej2_variantes.m`](ej2_variantes.m) · **Figuras:** `ej2_1.png` y `ej2_variantes_1.png` a `_7.png`
+**Archivos:** [`ej2.m`](ej2.m) (función) y [`ej2_variantes.m`](ej2_variantes.m) · **Figuras:** `ej2_1.png` (caso base) y `ej2_variantes_1.png` a `_4.png`
 
 ### Consigna
 
@@ -206,6 +206,8 @@ y[n] :  0  1  3  6 10 15 15 14 12  9  5
 
 ### Variantes de Δt (Nh = 101, Fc = 500 Hz)
 
+`ej2_variantes.m` grafica solo los dos valores nuevos (0.0005 y 0.001). El de 0.0001 es el caso base que ya grafica `ej2.m`, y se incluye en la tabla para comparar.
+
 | Δt | Fm | Nyquist | 2·Fc·Δt | max\|y\| | Qué pasa |
 |---|---|---|---|---|---|
 | 0.0001 | 10 kHz | 5000 Hz | 0.1 | 10.078 | Caso correcto: el filtro elimina los 1000 Hz |
@@ -218,11 +220,15 @@ Otra diferencia: con las mismas 401 muestras, la ventana dura 0.04 s, 0.2 s y 0.
 
 ### Variantes de Nh (Δt = 0.0001)
 
+Se grafica un valor menor y uno mayor que el caso base (Nh = 101), para ver el efecto en las dos direcciones:
+
 - **Nh = 21:** entra poco más que el lóbulo central de la sinc, y el filtro es muy pobre. Deja pasar ~6 % de la componente de 1000 Hz y amplifica ~9 % la de 150 Hz (sobrepico de Gibbs). La salida se aparta hasta 1.2 de la ideal.
-- **Nh = 51, 101, 201:** cada vez más parecido al filtro ideal, con salida más limpia.
+- **Nh = 201:** la sinc está mucho más completa. El filtro se parece más al ideal y la salida es más limpia.
 - **Costo de un Nh grande:** más cuentas, transitorios más largos y una salida más larga (Nx + Nh − 1).
 
 ### Caso Fc = 1000 Hz (el ejemplo del enunciado)
+
+La consigna no pide variar Fc, así que este caso no se grafica en `ej2_variantes.m`. Si lo piden en la defensa, se corre con `ej2([], [], 1000)`.
 
 La componente de 1000 Hz cae justo en el corte, donde |H| = 0.498 (medido). Pasa **atenuada a la mitad**: amplitud ~2.5 en vez de 5. Por eso conviene una Fc bien en el medio.
 
@@ -595,7 +601,7 @@ Porque el redondeo deja una parte imaginaria de ~10⁻¹⁵ que no tiene signifi
 |---|---|---|
 | [`ej1.m`](ej1.m) | script | Ejercicio 1 |
 | [`ej2.m`](ej2.m) | función `ej2(dt, Nh, Fc, Nx)` | Ejercicio 2 (un caso) |
-| [`ej2_variantes.m`](ej2_variantes.m) | script | Las variantes de Δt, Nh y Fc |
+| [`ej2_variantes.m`](ej2_variantes.m) | script | Las variantes de Δt y Nh (4 gráficos) |
 | [`ej3.m`](ej3.m) | función `ej3(dt, Nh, Fc, Nx, N)` | Ejercicio 3 |
 | [`ej4.m`](ej4.m) | función `ej4(Fm, Nh, Fc, Nx, N)` | Ejercicio 4 |
 | [`ej4_estudios.m`](ej4_estudios.m) | script | Estudios a) a d) del Ej. 4 |
@@ -605,9 +611,9 @@ Porque el redondeo deja una parte imaginaria de ~10⁻¹⁵ que no tiene signifi
 
 **Figuras de las variantes:**
 
-- `ej2_variantes_1/2/3` = Δt de 0.0001 / 0.0005 / 0.001.
-- `ej2_variantes_4/5/6` = Nh de 21 / 51 / 201.
-- `ej2_variantes_7` = Fc = 1000 Hz.
+- `ej2_variantes_1/2` = Δt de 0.0005 / 0.001.
+- `ej2_variantes_3/4` = Nh de 21 / 201.
+- El caso base (Δt = 0.0001, Nh = 101) es `ej2_1`.
 - `ej4_estudios_1/2/3/4` = estudios a / b / c / d.
 
 Todos los números de esta guía salen de correr los scripts en Octave 11.3.
