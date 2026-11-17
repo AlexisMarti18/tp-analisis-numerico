@@ -13,8 +13,9 @@ Esta guía explica cada consigna del TP, cómo se resolvió en Octave, qué resu
 5. [Ejercicio 3: convolución por FFT](#5-ejercicio-3-convolución-por-fft)
 6. [Ejercicio 4: filtro FIR con ventana de Hamming](#6-ejercicio-4-filtro-fir-con-ventana-de-hamming)
 7. [Diferencias con el enunciado](#7-diferencias-con-el-enunciado)
-8. [Preguntas para preparar la defensa](#8-preguntas-para-preparar-la-defensa)
-9. [Mapa de archivos](#9-mapa-de-archivos)
+8. [Cómo lo toman: guion de defensa ejercicio por ejercicio](#8-cómo-lo-toman-guion-de-defensa-ejercicio-por-ejercicio)
+9. [Preguntas para preparar la defensa](#9-preguntas-para-preparar-la-defensa)
+10. [Mapa de archivos](#10-mapa-de-archivos)
 
 ---
 
@@ -372,7 +373,168 @@ La duración de la ventana (40 ms) y del núcleo (~10 ms) se mantienen fijas en 
 
 ---
 
-## 8. Preguntas para preparar la defensa
+## 8. Cómo lo toman: guion de defensa ejercicio por ejercicio
+
+Según el relato de otro grupo, el docente va ejercicio por ejercicio:
+
+| Ej. | Qué pidió |
+|---|---|
+| 1 | Explicar cómo se hace la convolución y cómo se llega al resultado |
+| 2 | Identificar el cos y el sen. Después hizo **cambiar Δt y Fc en vivo, por separado**, y preguntó qué señal resultaba |
+| 3 | Lo mismo pero en frecuencia: reconocer el **fenómeno de Gibbs** |
+| 4 | Que es una mejora del 3: con la **ventana de Hamming** la señal queda más limpia |
+
+Para cada uno, abajo hay qué decir, cómo hacerlo en Octave y las trampas posibles. Las tablas del Ej. 2 salen de simular cada caso en Octave 11.3.
+
+### 8.1 Ejercicio 1: explicar la convolución
+
+**Qué decir (en 30 segundos):**
+
+> "La salida de un sistema LTI es la convolución de la entrada con la respuesta al impulso: y[n] = Σₖ x[k]·h[n−k]. Para cada n, se da vuelta h, se la corre n lugares, se multiplica con x donde se superponen y se suma. Como x es un pulso de unos, cada y[n] es la suma de los valores de la rampa que caen dentro del pulso. Primero crece mientras la rampa entra, llega al máximo 15 cuando entra entera, y después baja porque la rampa termina y se van perdiendo valores. El largo de y es 6 + 6 − 1 = 11 y arranca en n = −3 + 0."
+
+**Tabla para mostrar (ventana de 6 lugares que se desliza sobre la rampa 0 1 2 3 4 5):**
+
+```
+y[-2] = 1    [ .  .  .  .  0  1 ]
+y[-1] = 3    [ .  .  .  0  1  2 ]
+y[ 0] = 6    [ .  .  0  1  2  3 ]
+y[ 1] = 10   [ .  0  1  2  3  4 ]
+y[ 2] = 15   [ 0  1  2  3  4  5 ]   <- ventana llena
+y[ 3] = 15   [ 1  2  3  4  5  0 ]   sale el 0
+y[ 4] = 14   [ 2  3  4  5  0  0 ]   sale el 1
+y[ 5] = 12   ...
+y[ 6] = 9
+y[ 7] = 5    [ 5  0  0  0  0  0 ]
+```
+
+**Trampas y cómo responderlas:**
+
+- **"¿Por qué hay salida donde x vale 0 (n = 3 a 7)?"** Porque y[n] no es x[n]·h[n]. Depende de valores de x **anteriores** a n: el sistema tiene "memoria", como el eco en una sala.
+- **"¿Por qué y empieza en −2 y no en −3?"** Porque h[0] = 0, así que y[−3] = x[−3]·h[0] = 0.
+- **"¿Por qué baja si x es todo unos y h sube?"** Porque las dos son **finitas**, como dice el enunciado ("en un intervalo de tiempo guardado en el vector nx/nh"). Cuando la rampa termina, ya no entra nada nuevo. Si fueran infinitas, y crecería sin límite: (n+3)(n+4)/2.
+- **"¿Cuándo la salida es igual a h?"** Solo si x = δ[n] (un único 1 en n = 0). Un pulso es una suma de impulsos corridos, así que la salida es una suma de copias corridas de h.
+
+### 8.2 Ejercicio 2: identificar la señal y cambiar Δt y Fc
+
+#### Identificar el cos y el sen
+
+En x(t) = **10** cos(2π·**150**·t) + **5** sen(2π·**1000**·t):
+
+| | Amplitud | Frecuencia (el número que multiplica a 2π·t) | Periodo | Muestras por periodo con Δt = 0.0001 |
+|---|---|---|---|---|
+| Coseno | 10 | 150 Hz | 6.67 ms | ≈ 67 |
+| Seno | 5 | 1000 Hz | 1 ms | 10 |
+
+**Cómo reconocerlos en el gráfico de x[n]:**
+
+- **La onda lenta y grande es el coseno de 150 Hz.** Hay 6 ciclos en las 401 muestras.
+- **La ondulación rápida y chica montada encima es el seno de 1000 Hz.** Hay 40 ciclos.
+- **En t = 0, x[0] = 10.** El coseno arranca en su máximo y el seno arranca en 0: esa es la diferencia entre cos y sen.
+
+**Qué hace el sistema:** es un pasa bajos ideal (truncado) con corte en Fc. Con Fc = 500 Hz deja pasar 150 Hz y elimina 1000 Hz, así que **la señal resultante es ≈ 10 cos(2π·150·t)**, con transitorios en los bordes.
+
+#### Cómo cambiar los parámetros en vivo
+
+La función es `ej2(dt, Nh, Fc)`. Un `[]` deja el valor por defecto:
+
+```octave
+ej2(0.0005)            % cambia solo dt
+ej2([], [], 300)       % cambia solo Fc (dt = 0.0001, Nh = 101)
+ej2(0.0001, 101, 1000) % todo explícito
+ej2([], 21)            % cambia solo Nh
+```
+
+#### Procedimiento para predecir la salida (hacerlo en voz alta)
+
+1. **Calcular Fm = 1/Δt y Nyquist = Fm/2.**
+2. **Revisar cada componente de x.**
+   - Si su frecuencia es menor que Nyquist, se representa bien.
+   - Si es mayor, hay **aliasing** y aparece en |f − k·Fm| (el más cercano).
+   - Si es un **seno** justo en Nyquist o en un múltiplo de Fm, sus muestras valen 0 y **desaparece**.
+3. **Comparar la frecuencia (ya con alias, si lo hubo) con Fc.**
+   - Debajo de Fc pasa con amplitud ≈ igual.
+   - Encima de Fc se elimina.
+   - Cerca de Fc pasa **a la mitad**.
+4. **Revisar 2·Fc·Δt.** Si da 1, h[n] = sinc(n) = δ[n] y el filtro no hace nada (y = x). Si da más de 1, Fc quedó por encima de Nyquist y la fórmula deja de ser un pasa bajos.
+
+#### Tabla: variando Fc (Δt = 0.0001, Nh = 101)
+
+Amplitudes medidas en la zona central de y (sin transitorios):
+
+| Fc | Amp. 150 Hz | Amp. 1000 Hz | Señal resultante |
+|---|---|---|---|
+| 50 Hz | 1.4 | 0.0 | Casi nada: los 150 Hz se eliminan (queda un resto porque con Fc tan baja la sinc es muy ancha y Nh = 101 la corta mucho) |
+| 100 Hz | 0.6 | 0.0 | Casi nula |
+| **150 Hz** | **5.3** | 0.0 | ≈ 5 cos(2π·150t): Fc **justo en** 150 Hz, pasa **a la mitad** |
+| 300 Hz | 10.1 | 0.0 | ≈ 10 cos(2π·150t) |
+| **500 Hz** (TP) | 10.0 | 0.07 | ≈ 10 cos(2π·150t) |
+| 800 Hz | 10.0 | 0.2 | ≈ 10 cos(2π·150t), con un resto mínimo de 1000 Hz |
+| **1000 Hz** | 10.0 | **2.5** | 10 cos(2π·150t) + **2.5** sen(2π·1000t): el seno pasa **a la mitad** |
+| 1200 Hz | 10.0 | 4.7 | ≈ x(t): pasan casi enteras las dos |
+| 2000 Hz o más | 10.0 | 5.0 | = x(t): el filtro no elimina nada |
+
+**Frase para cerrar:** *"Lo que está por debajo de Fc pasa, lo que está por encima se elimina, y lo que cae justo en Fc pasa a la mitad."*
+
+#### Tabla: variando Δt (Fc = 500 Hz, Nh = 101)
+
+| Δt | Fm | Nyquist | 2FcΔt | Amp. 150 | Amp. 1000 | Señal resultante y por qué |
+|---|---|---|---|---|---|---|
+| 0.00005 | 20 kHz | 10 kHz | 0.05 | 9.9 | 0 | 10 cos(2π·150t). Filtra bien; la ventana de 401 muestras dura solo 20 ms |
+| **0.0001** | 10 kHz | 5 kHz | 0.1 | 10.0 | 0.07 | 10 cos(2π·150t). Caso del TP |
+| 0.0002 | 5 kHz | 2.5 kHz | 0.2 | 10.2 | 0.04 | 10 cos(2π·150t) |
+| 0.0003 | 3.3 kHz | 1667 Hz | 0.3 | 10.0 | 0.03 | 10 cos(2π·150t). Los 1000 Hz tienen solo 3.3 muestras por ciclo, pero se representan y se filtran |
+| **0.0005** | 2 kHz | **1000 Hz** | 0.5 | 10.0 | **0** | 10 cos(2π·150t), pero porque el seno de 1000 Hz cae **en Nyquist**: sen(π·n) = 0, desaparece **al muestrear** |
+| **0.0008** | 1250 Hz | 625 Hz | 0.8 | 10.0 | **5.0** | **Aliasing:** los 1000 Hz aparecen en 1250 − 1000 = **250 Hz**. Como 250 < Fc, **pasa entero**: salida = 150 Hz + alias de 250 Hz |
+| **0.001** | 1 kHz | 500 Hz | **1.0** | 10.0 | 0 | 10 cos(2π·150t). Aliasing: sen(2π·n) = 0. Además h = δ, así que **y = x**: el filtro no hace nada |
+| **0.002** | 500 Hz | 250 Hz | **2.0** | **20.0** | 0 | **20** cos(2π·150t). h[n] = 2·sinc(2n) = 2δ[n], o sea **y = 2x**. Fc = 500 Hz quedó por encima de Nyquist y la fórmula ya no es un pasa bajos |
+
+**Frase para cerrar:** *"Si Δt es chico (Fm alta) todo se representa bien y el filtro trabaja. Si Δt crece y Fm baja de 2000 Hz, los 1000 Hz no cumplen Nyquist: o desaparecen o aparecen como otra frecuencia (alias), y si el alias queda debajo de Fc, el filtro no lo puede sacar."*
+
+**Por qué cambia el gráfico aunque la señal resultante sea la misma:** con las mismas 401 muestras, un Δt más grande abarca más tiempo (Nx·Δt) y se ven más ciclos, con menos muestras por ciclo.
+
+### 8.3 Ejercicio 3: frecuencia y fenómeno de Gibbs
+
+**Qué decir:**
+
+> "Es el mismo filtrado del Ej. 2, pero hecho en frecuencia: la convolución en el tiempo equivale a multiplicar las transformadas. Se completan x y h con ceros hasta N = 1024 para que la convolución circular de la FFT coincida con la lineal (hace falta N ≥ 401 + 101 − 1 = 501). Se calculan las FFT, se multiplican y se antitransforma. El resultado es igual al de conv (diferencia de 10⁻¹⁴, solo redondeo)."
+
+**Cómo leer los espectros (eje k, con k → f = k·Fm/N ≈ k·9.77 Hz):**
+
+- **|X[k]|:** dos picos, en k ≈ 15 (150 Hz) y en k ≈ 102 (1000 Hz), más sus espejos del otro lado de k = 512.
+- **|H[k]|:** un escalón. Vale ≈ 1 hasta k ≈ 51 (Fc = 500 Hz) y ≈ 0 después, más su espejo.
+- **|Y[k]| = |X|·|H|:** queda solo el pico de 150 Hz.
+
+**Fenómeno de Gibbs, qué decir exactamente:**
+
+> "En |H[k]| aparecen oscilaciones y un sobrepico de ~10 % justo en el salto de 1 a 0, en el corte. Se debe a que la sinc ideal es infinita y la cortamos de golpe a 101 valores, que es como multiplicarla por una ventana rectangular. Ese corte abrupto en el tiempo genera las oscilaciones en frecuencia, que se concentran donde el filtro ideal es discontinuo. Aunque se agrande Nh no desaparece: el sobrepico se mantiene en ~9 %, solo se angosta."
+
+Ojo con la frase "por el corte abrupto en el medio del gráfico". La **causa** es el corte abrupto de la sinc en el **tiempo**. Las oscilaciones **aparecen** en el salto de |H| (en Fc), que en el gráfico de 0 a N−1 se ve dos veces: cerca de k ≈ 51 y de su espejo, k ≈ 973.
+
+**Si te hacen cambiar Fc acá:** el escalón de |H[k]| se mueve a k ≈ Fc·N·Δt (con Fc = 1000 Hz, k ≈ 102, justo sobre el pico de 1000 Hz, que queda a la mitad). Gibbs sigue estando en el nuevo corte.
+
+### 8.4 Ejercicio 4: Hamming
+
+**Qué decir:**
+
+> "Es una mejora del Ej. 3. Se multiplica la sinc por una ventana de Hamming, una campana que apaga suavemente los extremos en vez de cortarlos de golpe. Así se reduce el fenómeno de Gibbs: |H(f)| ya no tiene sobrepico y los lóbulos laterales bajan (de −28 dB a −41 dB). Después se normaliza dividiendo por la suma de h, para que la ganancia en bajas frecuencias sea 1. El precio es que la transición entre la banda que pasa y la eliminada es un poco más ancha. Además se usa Fm como dato en vez de Δt, y los ejes quedan en segundos y en Hz. La salida por conv y por FFT es la misma."
+
+**Si preguntan algo más:**
+
+- **Nh más grande:** transición más angosta (se reduce a la mitad al duplicar Nh).
+- **Nx más grande:** picos de |X| más finos (mejor resolución), más parecidos a las rayas de la señal infinita.
+- **Fm más baja:** con menos de 2000 Hz aparece aliasing de la componente de 1000 Hz.
+
+### 8.5 Antes de la defensa
+
+- [ ] Tener Octave abierto **en la carpeta del TP** y probar `ej1`, `ej2`, `ej3` y `ej4`.
+- [ ] Practicar `ej2([], [], 1000)` y `ej2(0.0008)` y saber explicar qué se ve.
+- [ ] Saber hacer a mano y[−1] o y[0] del Ej. 1.
+- [ ] Saber pasar de k a Hz: f = k·Fm/N.
+- [ ] Tener a mano la regla de Nyquist: Fm > 2·f_max.
+
+---
+
+## 9. Preguntas para preparar la defensa
 
 **¿Por qué hay que calcular `ny` a mano?**
 Porque `conv` solo devuelve valores; no sabe en qué n empieza cada señal. Inicio de y = inicio de x + inicio de h.
@@ -427,7 +589,7 @@ Porque el redondeo deja una parte imaginaria de ~10⁻¹⁵ que no tiene signifi
 
 ---
 
-## 9. Mapa de archivos
+## 10. Mapa de archivos
 
 | Archivo | Tipo | Contenido |
 |---|---|---|
