@@ -1,6 +1,6 @@
 # Guía de estudio: TP de Laboratorio de Análisis Numérico
 
-Esta guía explica cada consigna del TP, cómo se resolvió en Octave, qué muestra cada gráfico y **por qué** sale así. Está pensada para leerla con Octave abierto: corrés un ejercicio, mirás la ventana "Figure N" y buscás acá la explicación de esa misma figura.
+Esta guía explica cada consigna del TP, cómo se resolvió en Octave, qué muestra cada gráfico y **por qué** sale así. **Cada figura está incluida en la guía, justo arriba de su explicación**, así que se puede estudiar sin correr Octave. Las imágenes son las mismas que muestran las ventanas "Figure N" cuando se corre cada ejercicio, y están guardadas en la carpeta `figuras_octave/`.
 
 **Orden de lectura recomendado:** sección 1 (Octave mínimo) → sección 2 (teoría) → un ejercicio a la vez, con sus gráficos abiertos al lado.
 
@@ -187,6 +187,8 @@ El eje de y sale de la regla de la sección 2.1: empieza en −3 + 0 = −3 y te
 
 ### Cómo leer la Figure 1: "Ejercicio 1 - Convolucion discreta"
 
+![Figure 1 de ej1: x[n], h[n] e y[n]](figuras_octave/ej1_1.png)
+
 Los tres gráficos tienen el mismo eje horizontal, de **−4 a 8**: el rango de y (−3 a 7) más un lugar de margen a cada lado.
 
 **Arriba, "Entrada x[n] (pulso rectangular)":** 6 palitos de altura 1, en n = −3, −2, −1, 0, 1 y 2. En cualquier otro n la señal vale 0, y por eso no se dibuja nada.
@@ -275,6 +277,8 @@ y[ 7] = 5    [ 5  0  0  0  0  0 ]   sale el 4
 
 ### Figure 1 de `ej2`: "Ejercicio 2 - dt = 0.0001 s, Nh = 101, Fc = 500 Hz" (caso base)
 
+![Figure 1 de ej2: caso base, dt = 0.0001 s, Nh = 101](figuras_octave/ej2_1.png)
+
 El eje horizontal va de **−50 a 450** en los tres gráficos: son los límites de y.
 
 **Arriba, "Entrada x[n] (N_x = 401, Δt = 0.0001 s, F_m = 10000 Hz)":**
@@ -308,6 +312,8 @@ El eje horizontal va de **−50 a 450** en los tres gráficos: son los límites 
 
 ### Figure 1 de `ej2_variantes`: "Ejercicio 2 - dt = 0.0005 s, Nh = 101, Fc = 500 Hz"
 
+![Figure 1 de ej2_variantes: dt = 0.0005 s](figuras_octave/ej2_variantes_1.png)
+
 Cálculos previos: **Fm = 1/0.0005 = 2000 Hz**, **Nyquist = 1000 Hz**, **2·Fc·Δt = 0.5**.
 
 **Arriba, "Entrada x[n] (N_x = 401, Δt = 0.0005 s, F_m = 2000 Hz)":**
@@ -332,6 +338,8 @@ Cálculos previos: **Fm = 1/0.0005 = 2000 Hz**, **Nyquist = 1000 Hz**, **2·Fc·
 
 ### Figure 2 de `ej2_variantes`: "Ejercicio 2 - dt = 0.001 s, Nh = 101, Fc = 500 Hz"
 
+![Figure 2 de ej2_variantes: dt = 0.001 s](figuras_octave/ej2_variantes_2.png)
+
 Cálculos previos: **Fm = 1000 Hz**, **Nyquist = 500 Hz**, **2·Fc·Δt = 1**.
 
 **Arriba, "Entrada x[n] (N_x = 401, Δt = 0.001 s, F_m = 1000 Hz)":**
@@ -354,6 +362,8 @@ Cálculos previos: **Fm = 1000 Hz**, **Nyquist = 500 Hz**, **2·Fc·Δt = 1**.
 ---
 
 ### Figure 3 de `ej2_variantes`: "Ejercicio 2 - dt = 0.0001 s, Nh = 21, Fc = 500 Hz"
+
+![Figure 3 de ej2_variantes: Nh = 21](figuras_octave/ej2_variantes_3.png)
 
 Mismo muestreo que el caso base, pero con un núcleo de solo 21 valores.
 
@@ -380,6 +390,8 @@ Intuitivamente: promediar con una ventanita de solo 20 muestras no cancela del t
 ---
 
 ### Figure 4 de `ej2_variantes`: "Ejercicio 2 - dt = 0.0001 s, Nh = 201, Fc = 500 Hz"
+
+![Figure 4 de ej2_variantes: Nh = 201](figuras_octave/ej2_variantes_4.png)
 
 **Arriba, x[n]:** la misma entrada. El eje ahora va de **−100 a 500**, porque y es más larga.
 
@@ -458,6 +470,8 @@ Con Fm = 10000 Hz y N = 1024, cada k equivale a 10000/1024 ≈ 9.77 Hz:
 Todo lo que hay de k = 512 a 1023 es el **espejo** de 0–512, porque representa las frecuencias negativas. Por eso los espectros de esta figura son simétricos.
 
 ### Cómo leer la Figure 1: "Ejercicio 3 - Convolucion por FFT (N = 1024)"
+
+![Figure 1 de ej3: convolución por FFT, 3 filas x 2 columnas](figuras_octave/ej3_1.png)
 
 Los gráficos de la izquierda tienen el eje n de **−50 a 973** (los 1024 lugares). Los de la derecha tienen el eje k de **0 a 1023**.
 
@@ -549,6 +563,8 @@ Valores: Fm = 10000 Hz, Nh = 101, Fc = 500 Hz, Nx = 401, N = 1024.
 
 ### Figure 1 de `ej4`: "Ejercicio 4 - FIR Hamming (Fm = 10000 Hz, Nh = 101)"
 
+![Figure 1 de ej4: filtro con ventana de Hamming, 4 filas x 2 columnas](figuras_octave/ej4_1.png)
+
 Izquierda: tiempo en segundos, de **−0.005 a 0.045 s**. Derecha: frecuencia en Hz, de **0 a 5000 Hz** (Nyquist; no se muestra el espejo).
 
 **Fila 1, izquierda, "Entrada x(t_n) (F_m = 10000 Hz, N_x = 401)":** la misma entrada de siempre, ahora con el eje en segundos. Va de 0 a 0.04 s (401 × 0.0001 s), y las ondas grandes de 150 Hz duran 0.00667 s cada una (se ven 6).
@@ -577,6 +593,8 @@ Izquierda: tiempo en segundos, de **−0.005 a 0.045 s**. Derecha: frecuencia en
 ---
 
 ### Figure 1 de `ej4_estudios`: "a) Rectangular vs Hamming"
+
+![Figure 1 de ej4_estudios: |H(f)| rectangular vs Hamming, lineal y en dB](figuras_octave/ej4_estudios_1.png)
 
 Consigna: *"Verificar la mejora en el espectro H(f) reduciendo el fenómeno de Gibbs"*. Compara los dos núcleos con el mismo Nh = 101:
 - **Curva azul, "Rectangular (Ej. 2 y 3)":** la sinc cortada de golpe.
@@ -610,6 +628,8 @@ Consigna: *"Verificar la mejora en el espectro H(f) reduciendo el fenómeno de G
 
 ### Figure 2 de `ej4_estudios`: "b) Banda de transicion vs Nh"
 
+![Figure 2 de ej4_estudios: |H(f)| con Hamming para Nh = 21, 51, 101 y 201](figuras_octave/ej4_estudios_2.png)
+
 Consigna: *"Investigar los cambios en la calidad de su comportamiento en la banda de transición ... al modificar las dimensiones del núcleo del filtro"*.
 
 Un solo gráfico, **"|H(f)| con ventana de Hamming para distintos N_h"**, de 0 a 2000 Hz. Colores según la leyenda: **N_h = 21** azul, **51** naranja, **101** amarillo, **201** violeta.
@@ -637,6 +657,8 @@ Un solo gráfico, **"|H(f)| con ventana de Hamming para distintos N_h"**, de 0 a
 
 ### Figure 3 de `ej4_estudios`: "c) Efecto de enventanado sobre X(f)"
 
+![Figure 3 de ej4_estudios: espectro de la entrada para Nx = 101, 401 y 1601](figuras_octave/ej4_estudios_3.png)
+
 Consigna: *"Investigar los cambios en la calidad del espectro de la señal de entrada, al modificar el tamaño de la ventana no nula, y verificar el efecto enventanado comparándolo con el espectro de la señal de longitud infinita"*.
 
 Tres gráficos, uno debajo del otro, de 0 a 1500 Hz. En cada uno:
@@ -662,6 +684,8 @@ Tres gráficos, uno debajo del otro, de 0 a 1500 Hz. En cada uno:
 ---
 
 ### Figure 4 de `ej4_estudios`: "d) Variacion de Fm"
+
+![Figure 4 de ej4_estudios: x, y y |X(f)| para Fm = 10000, 3000, 2000 y 1200 Hz](figuras_octave/ej4_estudios_4.png)
 
 Consigna: *"Verificar las modificaciones en la calidad de representación de las señales en tiempo discreto y frecuencias al modificar la frecuencia de muestreo Fm"*.
 
