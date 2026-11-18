@@ -40,16 +40,16 @@ clear; clc; close all;
 %   dt = 0.001   Fm =  1000 Hz  2*Fc*dt = 1.00  max|y| = 10.000
 %
 % INTERPRETACIÓN (lo más importante para las conclusiones)
-%   * Caso base dt = 0.0001 (Fm = 10 kHz, en ej2.m): Nyquist = 5000 Hz,
+%   * Caso base dt = 0.0001 (Fm = 10000 Hz, en ej2.m): Nyquist = 5000 Hz,
 %     ambas componentes bien representadas y el filtro elimina la de
 %     1000 Hz. La salida es ~10 cos(2π·150·t).
 %
-%   * dt = 0.0005 (Fm = 2 kHz): Nyquist = 1000 Hz, ¡justo la frecuencia de
+%   * dt = 0.0005 (Fm = 2000 Hz): Nyquist = 1000 Hz, ¡justo la frecuencia de
 %     la componente alta! Sus muestras valen 5·sen(2π·1000·n·0.0005) =
 %     5·sen(π·n) = 0 para todo n entero. La componente de 1000 Hz
 %     DESAPARECE YA AL MUESTREAR, antes de pasar por el filtro.
 %
-%   * dt = 0.001 (Fm = 1 kHz): Nyquist = 500 Hz < 1000 Hz -> hay ALIASING.
+%   * dt = 0.001 (Fm = 1000 Hz): Nyquist = 500 Hz < 1000 Hz -> hay ALIASING.
 %     5·sen(2π·1000·n·0.001) = 5·sen(2π·n) = 0: también desaparece.
 %     Además 2·Fc·dt = 1, entonces h[n] = sinc(n), que vale 1 en n = 0 y 0
 %     en cualquier otro entero: h[n] = δ[n]. El "filtro" es la identidad,
